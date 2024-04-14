@@ -33,3 +33,6 @@ pipeline{
             steps{
                 git 'https://github.com/kdillip/FunctionalTesting.git'
                 sh 'java -jar /var/lib/jenkins/workspace/declartivepipeline/testing.jar'
+            }
+        }
+    }
