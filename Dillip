@@ -1,0 +1,35 @@
+pipeline{
+    agent any
+    stages{
+        stage('checkout code'){
+            steps{
+                git 'https://github.com/kdillip/maven-web-app.git'
+            }
+        }
+        stage('build code help of maven'){
+            steps{
+                sh 'mvn clean package'
+            }
+        }
+        stage('build docker image'){
+            steps{
+                sh 'sudo docker build -t tomcat .'
+            }
+        }
+        stage('docker login and push image'){
+            steps{
+                withCredentials([string(credentialsId: 'Dockerhb', variable: 'Dockerhb')]) {
+                    sh 'sudo docker login -u rdillip -p ${Dockerhb}'
+                    sh 'sudo docker push rdillip/tomcat'
+                }
+            }
+        }
+        stage('deploy to stage environment using ansble'){
+            steps{
+                sh 'sudo ssh ubuntu@172.31.32.52 ansible-playbook playbook.yml -b'
+            }
+        }
+        stage('deploy testing environment'){
+            steps{
+                git 'https://github.com/kdillip/FunctionalTesting.git'
+                sh 'java -jar /var/lib/jenkins/workspace/declartivepipeline/testing.jar'
